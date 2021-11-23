@@ -1,10 +1,10 @@
 name:                b-compiler
 version:             0.1.0.0
-github:              "githubuser/b-compiler"
-license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2021 Author name here"
+github:              "mrr1vfe/b-compiler"
+license:             GPLv2
+author:              "Reid Chen"
+maintainer:          "mrr1vfe@gmail.com"
+copyright:           "2021 Reid Chen"
 
 extra-source-files:
 - README.md
@@ -17,10 +17,27 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/b-compiler#readme>
+description:         Please see the README on GitHub at <https://github.com/mrr1vfe/b-compiler#readme>
+default-extensions: OverloadedStrings, LambdaCase
 
 dependencies:
 - base >= 4.7 && < 5
+- mtl
+- array
+- containers
+- text
+- string-conversions
+- directory
+- process
+- unix
+- filepath
+- bytestring
+- prettyprinter
+- pretty-simple
+- llvm-hs-pure >= 9 && < 10
+- llvm-hs-pretty >= 0.9 && < 1
+- megaparsec
+- parser-combinators
 
 library:
   source-dirs: src
@@ -30,11 +47,17 @@ executables:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
+    - -Wall
+    - -fno-warn-name-shadowing
+    - -Wcompat
+    - -Wincomplete-uni-patterns
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
     - b-compiler
+    - optparse-applicative
+
 
 tests:
   b-compiler-test:
@@ -46,3 +69,6 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - b-compiler
+    - tasty
+    - tasty-golden
+    - tasty-hunit
