@@ -9,7 +9,7 @@ void foo2(int a, int b) {
 int main(int argc) {
     int a;
     int b;
-    int c;
+    bool c;
     int x;
     int y;
     if ((b == (-1))) {
@@ -21,8 +21,8 @@ int main(int argc) {
         x = 0;
     }   
 
-    foo(a);
-    foo();
+    foo1(a);
+    foo1();
     foo2(a, b);
     foo2(b);
 }
