@@ -52,5 +52,9 @@ runOpts (Options action infile ptype) = do
   case parseTree of
     Left  err -> putStrLn $ errorBundlePretty err
     Right ast -> case action of
-      -- Ast -> putDoc $ pretty ast <> "\n"
-      _   -> error "Not yet implemented"
+      Ast -> putDoc $ pretty ast <> "\n"
+      _   -> case checkProgram ast of
+        Left err -> putDoc $ pretty err <> "\n"
+        Right sast -> case action of
+          Sast -> pPrint sast
+          _ -> error "Haven't written codegen yet"

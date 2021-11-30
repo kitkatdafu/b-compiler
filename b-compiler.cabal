@@ -27,8 +27,13 @@ library
   exposed-modules:
       B
       Parser
+      Sast
       Scanner
+      Semant
+      Semant.Analysis
+      Semant.Error
       Syntax
+      Utils
   other-modules:
       Paths_b_compiler
   hs-source-dirs:
