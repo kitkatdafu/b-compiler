@@ -52,7 +52,6 @@ checkExpr :: Expr -> Semant SExpr
 checkExpr expr = case expr of
   IntLit i -> pure (TypeInt, SIntLit i)
   StrLit s -> pure (TypeStr, SStrLit s)
-  FloatLit f -> pure (TypeFloat, SFloatLit f)
   BoolLit b -> pure (TypeBool, SBoolLit b)
   NoExpr -> pure (TypeVoid, SNoExpr)  
 
@@ -67,9 +66,9 @@ checkExpr expr = case expr of
     lhs'@(t1, _) <- checkExpr lhs
     rhs'@(t2, _) <- checkExpr rhs
     let
-      assertSym = unless (t1 == t2) $ throwError $ TypeError [TypeInt, TypeFloat] t1 (Expr expr)
+      assertSym = unless (t1 == t2) $ throwError $ TypeError [TypeInt] t1 (Expr expr)
       checkArith = do
-        unless (isNumeric t1) $ throwError $ TypeError [TypeInt, TypeFloat] t1 (Expr expr)
+        unless (isNumeric t1) $ throwError $ TypeError [TypeInt] t1 (Expr expr)
         pure (t1, SBinOp op lhs' rhs')
       checkBool = do
         unless (t1 == TypeBool) $ throwError $ TypeError [TypeBool] t1 (Expr expr)
@@ -83,14 +82,14 @@ checkExpr expr = case expr of
       Or -> assertSym >> checkBool
       relational -> do
         assertSym
-        unless (isNumeric t1) $ throwError $ TypeError [TypeInt, TypeFloat] t1 (Expr expr)
+        unless (isNumeric t1) $ throwError $ TypeError [TypeInt] t1 (Expr expr)
         pure (TypeBool, SBinOp op lhs' rhs')
   UniOp op e -> do
     e'@(ty, _) <- checkExpr e
     case op of
       Neg -> do
         unless (isNumeric ty)
-          $ throwError (TypeError [TypeInt, TypeFloat] ty (Expr expr))
+          $ throwError (TypeError [TypeInt] ty (Expr expr))
         pure (ty, SUniOp Neg e')
       Not -> do
         unless (ty == TypeBool) $ throwError $
@@ -146,7 +145,6 @@ checkExpr expr = case expr of
     pure (t2, SAssign lval rhs')      
   where isNumeric = \case
           TypeInt -> True
-          TypeFloat -> True
           _ -> False
   
 
@@ -162,18 +160,6 @@ checkStatement func stmt = case stmt of
     unless (ty == TypeBool) $ throwError $ TypeError [TypeBool] ty stmt
     action' <- checkStatement func action
     pure $ SIf cond' (SDoWhile cond' action') (SBlock []) 
-  For init cond inc action -> do
-    cond'@(ty, _) <- checkExpr cond
-    unless (ty == TypeBool) $ throwError $ TypeError [TypeBool] ty stmt
-    init'   <- checkExpr init
-    inc'    <- checkExpr inc
-    action' <- checkStatement func action
-    pure $ SBlock
-      [ SExpr init'
-      , SIf cond'
-            (SDoWhile cond' (SBlock [action', SExpr inc'])) 
-            (SBlock [])
-      ]
   Return expr -> do
     e@(ty, _) <- checkExpr expr
     unless (ty == retType func) $ throwError $ 

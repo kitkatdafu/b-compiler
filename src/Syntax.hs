@@ -4,6 +4,8 @@ import Data.Text (Text)
 import Data.Text.Prettyprint.Doc
 import Data.Char
 
+
+-- AST of the language
 -- Binary Operator
 data Op = Plus
         | Minus
@@ -34,7 +36,6 @@ data Expr = BinOp Op Expr Expr
           | Assign Expr Expr
           | IntLit Int
           | StrLit Text
-          | FloatLit Double
           | BoolLit Bool
           | Call Id [Expr]
           | Dot Expr Expr
@@ -55,7 +56,6 @@ data Stmt = If Expr Stmt Stmt
 -- Type
 data Type = TypeInt
           | TypeBool
-          | TypeFloat
           | TypeVoid
           | TypeStr
           | TypeStruct Id
@@ -115,7 +115,6 @@ instance Pretty Type where
     TypeInt -> "int"
     TypeBool -> "bool"
     TypeVoid -> "void"
-    TypeFloat -> "float"
     TypeStr -> "string"
     TypeStruct id -> "struct" <+> pretty id
 
@@ -131,7 +130,6 @@ instance Pretty Expr where
     IntLit i -> pretty i
     -- dquotes: place double quotes around its argument
     StrLit s -> dquotes $ pretty s
-    FloatLit f -> pretty f
     BoolLit b -> if b then "true" else "false"
     -- tupled: use parentheses to enclose its argument
     Call f es -> pretty f <> tupled (map pretty es)

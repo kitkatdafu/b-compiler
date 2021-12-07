@@ -7,6 +7,7 @@ import Control.Monad.Combinators.Expr
 import Control.Applicative (liftA2, liftA3)
 import Data.Either
 
+-- Operator Table
 opTable :: [[Operator Parser Expr]]
 opTable =
   [[InfixL $ Dot <$ symbol "."]
@@ -29,15 +30,15 @@ opTable =
     unary op sym = Prefix $ foldr1 (.) <$> some (op <$ symbol sym)
     infixL op sym = InfixL $ BinOp op <$ symbol sym
 
+-- Parser for the term
 termP :: Parser Expr
 termP = parens exprP
-    <|> try (FloatLit <$> float)
     <|> IntLit <$> int
     <|> BoolLit <$> (True <$ reservedWord "true" <|> False <$ reservedWord "false")
     <|> try (Call <$> identifier <*> parens (exprP `sepBy` comma))
     <|> StrLit <$> strLit
     <|> Var <$> identifier
-  
+
 exprP :: Parser Expr
 exprP = makeExprParser termP opTable
 
@@ -61,25 +62,19 @@ statementP = Expr <$> exprP <* semicolon
   <|> Return <$> (reservedWord "return" *> exprMaybe <* semicolon)
   <|> Block <$> braces (many statementP)
   <|> ifP
-  <|> forP
   <|> whileP
   <|> plusplusP
   <|> minusminusP
 
 plusplusP :: Parser Stmt
 plusplusP = PlusPlus <$> (symbol "++" *> exprP <* semicolon)
+
 minusminusP :: Parser Stmt
 minusminusP = MinusMinus <$> (symbol "--" *> exprP <* semicolon)
 
 ifP :: Parser Stmt
 ifP = liftA3 If (reservedWord "if" *> parens exprP) statementP maybeElse
   where maybeElse = option (Block []) (reservedWord "else" *> statementP)
-
-forP :: Parser Stmt
-forP = do
-  reservedWord "for"
-  (e1, e2, e3) <- parens $ liftA3 (,,) (exprMaybe <* semicolon) (exprP <* semicolon) exprMaybe
-  For e1 e2 e3 <$> statementP
 
 whileP :: Parser Stmt
 whileP = liftA2 While (reservedWord "while" *> parens exprP) statementP
